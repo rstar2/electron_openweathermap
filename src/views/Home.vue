@@ -1,13 +1,13 @@
 <template>
-  <HelloWorld />
+  <SelectCity/>
 </template>
 
 <script>
-  import HelloWorld from '../components/HelloWorld'
+import SelectCity from '../components/SelectCity';
 
-  export default {
-    components: {
-      HelloWorld
-    }
+export default {
+  components: {
+    SelectCity
   }
+};
 </script>
