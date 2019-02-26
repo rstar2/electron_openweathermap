@@ -1,5 +1,15 @@
 # openweathermap
 
+## Steps done:
+```
+vue create openwathermap
+cd openwathermap
+vue add vuetify
+vue add electron-builder
+```
+
+
+
 ## Project setup
 ```
 npm install
@@ -8,6 +18,11 @@ npm install
 ### Compiles and hot-reloads for development
 ```
 npm run serve
+```
+
+### Compiles and hot-reloads for development in Electron
+```
+npm run serve:electron
 ```
 
 ### Compiles and minifies for production
