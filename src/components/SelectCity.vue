@@ -1,7 +1,8 @@
 <template>
   <v-container>
-    <v-layout text-xs-center wrap>
-      <v-flex xs12>
+    <v-layout wrap>
+
+      <v-flex xs12 md6>
         <v-card>
           <v-card-text>
             <p>Welcome to météo app.</p>
@@ -15,72 +16,109 @@
         </v-card>
       </v-flex>
 
-      <v-flex xs12 v-if="show">
-        <v-card>
+      <v-flex xs12 md6>
+        <v-card v-if="data">
           <v-card-text>
-            <v-layout row>
-              <v-layout xs6>
-                <v-card-text>
-                  <v-spacer></v-spacer>
-                  <h1>{{temp.toFixed(2)}}°C</h1>
-                  <h1>{{weatherDescription}}</h1>
-                </v-card-text>
-              </v-layout>
-              <v-layout xs6>
-                <v-card-text>
-                  <p>
-                    <v-icon>fas fa-snowflake</v-icon>
-                    Min : {{ tempMin.toFixed(2) }}°C
-                  </p>
-                  <p>
-                    <v-icon>fas fa-sun</v-icon>
-                    Max : {{ tempMax.toFixed(2) }}°C
-                  </p>
-                  <p>
-                    <v-icon>fas fa-tint</v-icon>
-                    Humidity : {{ humidity }} %
-                  </p>
-                </v-card-text>
-              </v-layout>
+            <v-layout justify-space-between>
+              <v-flex>
+                <h1>{{ data.temp | temperature }}</h1>
+                <h1>{{ data.weatherDescription }}</h1>
+              </v-flex>
+              <v-flex>
+                <p>
+                  <v-icon>mdi-thermometer-minus</v-icon>
+                  Min : {{ data.tempMin | temperature }}
+                </p>
+                <p>
+                  <v-icon>mdi-thermometer-plus</v-icon>
+                  Max : {{ data.tempMax | temperature }}
+                </p>
+                <p>
+                  <v-icon>mdi-water</v-icon>
+                  Humidity : {{ data.humidity | percent }}
+                </p>
+              </v-flex>
             </v-layout>
           </v-card-text>
         </v-card>
+        <v-card v-else-if="error">
+          <v-card-text>
+            <p class="error--text">{{error}}</p>
+          </v-card-text>
+        </v-card>
       </v-flex>
+
     </v-layout>
   </v-container>
 </template>
 
 <script>
 import axios from 'axios';
+axios.defaults.baseURL = 'http://api.openweathermap.org/data/2.5';
 
 export default {
   data () {
     return {
+      city: null,
 
+      error: null,
+      data: {
+        country: '',
+        weatherDescription: '',
+        temp: null,
+        tempMin: null,
+        tempMax: null,
+        humidity: null,
+      }
     };
+  },
+  created () {
+    this.data = null;
+  },
+  filters: {
+    temperature (value) {
+      return value.toFixed(2) + ' °C';
+    },
+    percent (value) {
+      return value + ' %';
+    }
   },
   methods: {
     open (link) {
       this.$electron.shell.openExternal(link);
     },
     getWeather () {
+      if (!this.city) {
+        console.log('No city selected yet');
+
+        return;
+      }
+
+      this.error = null;
+      this.data = null;
       axios
-        .get(this.url, {
+        .get('/weather', {
           params: {
             q: this.city,
-            appid: this.key
+            appid: this.$root.$options.OPENWEATHERMAP_API_KEY
           }
         })
         .then(response => {
-          this.temp = response.data.main.temp - 274;
-          this.tempMax = response.data.main.temp_max - 274;
-          this.tempMin = response.data.main.temp_min - 274;
-          this.humidity = response.data.main.humidity;
-          this.weatherDescription = response.data.weather[0].description;
-          this.show = true;
+          const { main, weather, sys } = response.data;
+
+          const data = {};
+          data.temp = main.temp - 274;
+          data.tempMax = main.temp_max - 274;
+          data.tempMin = main.temp_min - 274;
+          data.humidity = main.humidity;
+          data.weatherDescription = weather[0].description;
+          data.country = sys.country;
+
+          this.data = data;
         })
-        .catch(errors => {
-          console.log(errors);
+        .catch(({ config, request, response }) => {
+          const { data } = response;
+          this.error = (data && data.message) || 'Unknown error';
         });
     }
   }
