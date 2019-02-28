@@ -1,22 +1,21 @@
 <template>
   <v-container>
     <v-layout wrap>
-
-      <v-flex xs12 md6>
+      <v-flex xs12>
         <v-card>
           <v-card-text>
             <p>Welcome to météo app.</p>
             <p>Search for a city to display the weather</p>
-            <v-text-field label="City" box v-model="city"></v-text-field>
+            <v-text-field label="City" box v-model="city" @keyup.enter="getWeather"></v-text-field>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn primary flat router @click="getWeather">Search</v-btn>
+            <v-btn primary flat @click="getWeather">Search</v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
 
-      <v-flex xs12 md6>
+      <v-flex xs12>
         <v-card v-if="data">
           <v-card-text>
             <v-layout justify-space-between>
@@ -47,7 +46,6 @@
           </v-card-text>
         </v-card>
       </v-flex>
-
     </v-layout>
   </v-container>
 </template>
@@ -68,7 +66,7 @@ export default {
         temp: null,
         tempMin: null,
         tempMax: null,
-        humidity: null,
+        humidity: null
       }
     };
   },
